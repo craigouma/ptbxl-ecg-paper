@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<!--
+  SETUP: confirm repo is named  ptbxl-ecg-paper  on github.com/craigouma
+  PDF must be named             ptbxl_efficient_ecg.pdf  (no spaces)
+  Replace YOUR_SCHOLAR_ID below with your actual Google Scholar ID
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Scholar indexing -->
+  <meta name="citation_title"
+        content="Compact 1D Residual Networks for Efficient 12-Lead ECG Classification: A PTB-XL Benchmarking Study">
+  <meta name="citation_author"       content="Ouma, Craig Carlos">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_online_date"      content="2026/06/13">
+  <meta name="citation_language"     content="en">
+  <meta name="citation_abstract_html_url"
+        content="https://craigouma.github.io/ptbxl-ecg-paper/">
+  <meta name="citation_pdf_url"
+        content="https://craigouma.github.io/ptbxl-ecg-paper/ptbxl_efficient_ecg.pdf">
+  <meta name="citation_keywords"
+        content="ECG classification; ResNet1D; PTB-XL; efficient deep learning; resource-constrained; cardiology; arrhythmia">
+
+  <!-- Open Graph -->
+  <meta property="og:title"
+        content="Compact 1D ResNet for ECG Classification — Craig Carlos Ouma">
+  <meta property="og:description"
+        content="ResNet1D-Lite (1M params, 4MB) matches ResNet1D-Full (8.6M params) on PTB-XL diagnostic superclass classification — macro AUROC 0.9253 vs 0.9246 at 8.65× fewer parameters.">
+  <meta property="og:type" content="article">
+
+  <title>Efficient ECG Classification — Craig Carlos Ouma</title>
+
+  <style>
+    :root {
+      --navy:    #1A3A5C;
+      --blue:    #2563EB;
+      --blue-lt: #EFF6FF;
+      --red:     #B91C1C;
+      --bg:      #FFFFFF;
+      --bg-alt:  #F4F8FC;
+      --border:  #CBD8E6;
+      --text:    #1E2D3D;
+      --muted:   #566B7E;
+      --code-bg: #111827;
+      --code-txt:#93C5FD;
+      --serif: 'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+      --sans:  system-ui,-apple-system,'Segoe UI',sans-serif;
+      --mono:  'Courier New',Courier,monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);
+         line-height:1.65;font-size:16px}
+    .page{max-width:740px;margin:0 auto;padding:0 24px 80px}
+
+    /* ECG waveform header */
+    .wave-header{width:100%;height:56px;margin-bottom:36px;overflow:hidden}
+    .wave-header svg{width:100%;height:56px;display:block}
+
+    /* Badges */
+    .badge-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+    .badge{font-family:var(--mono);font-size:11px;font-weight:700;
+           letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;
+           border-radius:3px;background:#DBEAFE;color:#1D4ED8}
+    .badge.open{background:#ECFDF5;color:#065F46}
+    .pub-date{font-size:13px;color:var(--muted);font-family:var(--mono)}
+
+    /* Title */
+    h1{font-family:var(--serif);font-size:clamp(22px,4vw,30px);font-weight:700;
+       line-height:1.25;color:var(--navy);margin-bottom:20px;letter-spacing:-.01em}
+
+    /* Author */
+    .author-block{margin-bottom:28px}
+    .author-name{font-size:16px;font-weight:600;color:var(--text)}
+    .affil{font-size:13.5px;color:var(--muted);margin-top:2px}
+
+    /* Stats */
+    .stats{display:flex;border:1px solid var(--border);border-radius:8px;
+           overflow:hidden;margin-bottom:32px}
+    .stat{flex:1;text-align:center;padding:16px 12px;
+          border-right:1px solid var(--border);background:var(--bg-alt)}
+    .stat:last-child{border-right:none}
+    .stat-value{font-family:var(--serif);font-size:24px;font-weight:700;
+                color:var(--navy);line-height:1;display:block}
+    .stat-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;
+                letter-spacing:.07em;margin-top:5px;display:block}
+
+    /* Buttons */
+    .btn-row{display:flex;gap:12px;margin-bottom:36px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+         font-size:14px;font-weight:600;padding:10px 22px;border-radius:6px;
+         transition:opacity .15s,transform .1s;white-space:nowrap}
+    .btn:hover{opacity:.88;transform:translateY(-1px)}
+    .btn-primary{background:var(--navy);color:#fff}
+    .btn-ghost{background:transparent;color:var(--navy);
+               border:1.5px solid var(--border)}
+
+    /* Section label */
+    .section-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+                   text-transform:uppercase;color:var(--blue);font-weight:700;
+                   margin-bottom:10px}
+
+    /* Abstract */
+    .abstract-box{background:var(--blue-lt);border-left:3px solid var(--blue);
+                  border-radius:0 6px 6px 0;padding:22px 26px;margin-bottom:36px}
+    .abstract-box p{font-family:var(--serif);font-size:15.5px;
+                    line-height:1.75;color:var(--text)}
+
+    hr{border:none;border-top:1px solid var(--border);margin:32px 0}
+
+    /* Keywords */
+    .keywords{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px}
+    .kw{font-size:12.5px;padding:4px 11px;border:1px solid var(--border);
+        border-radius:99px;color:var(--muted);background:var(--bg-alt)}
+
+    /* Key result callout */
+    .callout{background:#FEF3C7;border-left:3px solid #D97706;
+             border-radius:0 6px 6px 0;padding:16px 20px;margin-bottom:32px}
+    .callout p{font-family:var(--serif);font-size:15px;color:#92400E}
+    .callout strong{color:#78350F}
+
+    /* Figures */
+    .figures{display:grid;grid-template-columns:1fr 1fr;gap:16px;
+             margin-bottom:36px}
+    .fig-card{border:1px solid var(--border);border-radius:8px;overflow:hidden;
+              background:var(--bg-alt)}
+    .fig-card img{width:100%;height:auto;display:block}
+    .fig-cap{font-size:12px;color:var(--muted);padding:8px 12px;
+             border-top:1px solid var(--border);font-family:var(--mono)}
+
+    /* BibTeX */
+    .bibtex-wrap{background:var(--code-bg);border-radius:8px;
+                 overflow:hidden;margin-bottom:36px}
+    .bibtex-bar{display:flex;justify-content:space-between;align-items:center;
+                padding:10px 16px;background:#1F2937}
+    .bibtex-bar span{font-family:var(--mono);font-size:11px;color:#9CA3AF;
+                     letter-spacing:.06em;text-transform:uppercase}
+    .copy-btn{font-family:var(--mono);font-size:11px;background:#374151;
+              color:#D1D5DB;border:none;padding:4px 12px;border-radius:4px;
+              cursor:pointer;transition:background .15s}
+    .copy-btn:hover{background:#4B5563}
+    pre.bibtex{font-family:var(--mono);font-size:12.5px;color:var(--code-txt);
+               line-height:1.7;padding:20px 20px 24px;overflow-x:auto}
+
+    /* Links */
+    .links-row{display:flex;gap:14px;flex-wrap:wrap}
+    .link-card{display:flex;align-items:center;gap:10px;text-decoration:none;
+               color:var(--text);font-size:14px;font-weight:500;padding:12px 18px;
+               border:1px solid var(--border);border-radius:8px;background:var(--bg-alt);
+               transition:border-color .15s,background .15s}
+    .link-card:hover{border-color:var(--blue);background:var(--blue-lt)}
+
+    footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--border);
+           font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+
+    @media(max-width:560px){
+      .stats{flex-direction:column}
+      .stat{border-right:none;border-bottom:1px solid var(--border)}
+      .stat:last-child{border-bottom:none}
+      .figures{grid-template-columns:1fr}
+      .btn-row{flex-direction:column}
+      .btn{justify-content:center}
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ECG waveform — 12-lead motif -->
+  <div class="wave-header" aria-hidden="true">
+    <svg viewBox="0 0 740 56" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- background traces -->
+      <path d="M0,28 L40,28 L46,26 L52,8 L58,46 L64,28 L130,28
+               L136,26 L142,8 L148,46 L154,28 L220,28
+               L226,26 L232,8 L238,46 L244,28 L310,28
+               L316,26 L322,8 L328,46 L334,28 L400,28
+               L406,26 L412,8 L418,46 L424,28 L490,28
+               L496,26 L502,8 L508,46 L514,28 L580,28
+               L586,26 L592,8 L598,46 L604,28 L740,28"
+            fill="none" stroke="#1A3A5C" stroke-width="1.2"
+            stroke-linecap="round" opacity="0.15"/>
+      <!-- highlighted beat -->
+      <path d="M220,28 L226,26 L232,8 L238,46 L244,28"
+            fill="none" stroke="#2563EB" stroke-width="2.2"
+            stroke-linecap="round" opacity="0.7"/>
+    </svg>
+  </div>
+
+  <!-- Badges -->
+  <div class="badge-row">
+    <span class="badge">Preprint</span>
+    <span class="badge open">Open Code</span>
+    <span class="pub-date">June 2026</span>
+  </div>
+
+  <!-- Title -->
+  <h1>Compact 1D Residual Networks for Efficient
+      12-Lead ECG Classification:
+      A PTB-XL Benchmarking Study</h1>
+
+  <!-- Author -->
+  <div class="author-block">
+    <div class="author-name">Craig Carlos Ouma</div>
+    <div class="affil">Independent Researcher &nbsp;·&nbsp;
+      <a href="mailto:craigcarlos95@gmail.com"
+         style="color:var(--blue);text-decoration:none">craigcarlos95@gmail.com</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-value">21,801</span>
+      <span class="stat-label">ECG recordings</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">0.9253</span>
+      <span class="stat-label">Lite macro AUROC</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">8.65×</span>
+      <span class="stat-label">Parameter reduction</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">4 MB</span>
+      <span class="stat-label">Lite model size</span>
+    </div>
+  </div>
+
+  <!-- Key result callout -->
+  <div class="callout">
+    <p><strong>Key finding:</strong> ResNet1D-Lite (1.0M parameters, 4 MB)
+    matches and marginally exceeds ResNet1D-Full (8.6M parameters, 34.5 MB)
+    on macro AUROC — 0.9253 vs 0.9246 — at 8.65× fewer parameters, demonstrating
+    competitive ECG classification within a footprint suitable for edge deployment.</p>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <a class="btn btn-primary" href="ptbxl_efficient_ecg.pdf"
+       target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download PDF
+    </a>
+    <a class="btn btn-ghost" href="https://github.com/craigouma/ptbxl-ecg-paper"
+       target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.38.6.11.82-.26.82-.58
+                 0-.28-.01-1.02-.01-2-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75
+                 -1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1
+                 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22
+                 -.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.01
+                 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84
+                 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.6
+                 -.01 2.9-.01 3.29 0 .32.21.7.82.58A12 12 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/>
+      </svg>
+      Code &amp; Notebook
+    </a>
+    <a class="btn btn-ghost" href="https://www.kaggle.com/datasets/khyeh0719/ptb-xl-dataset-reformatted"
+       target="_blank" rel="noopener">Dataset</a>
+  </div>
+
+  <!-- Abstract -->
+  <div class="section-label">Abstract</div>
+  <div class="abstract-box">
+    <p>Automated 12-lead ECG classification has reached near-cardiologist accuracy
+    on established benchmarks, yet most published models are too large for the
+    low-resource clinical hardware common in sub-Saharan Africa and other
+    resource-constrained settings. We ask whether a substantially smaller
+    architecture can match the discriminative performance of a full-scale model on
+    the PTB-XL diagnostic superclass task. We train two 1D residual
+    networks — ResNet1D-Full (8.6M parameters, 34.5 MB) and ResNet1D-Lite
+    (1.0M parameters, 4.0 MB) — on the same five-class multi-label task
+    (NORM, MI, STTC, CD, HYP) using the standard PTB-XL train/validation/test
+    split. On the held-out test set, ResNet1D-Lite achieves a macro AUROC of
+    0.9253 versus 0.9246 for ResNet1D-Full, exceeding the larger model at
+    8.65× fewer parameters. ResNet1D-Lite also generalises better: its
+    post-peak validation AUROC decay (0.0103) is roughly half that of
+    ResNet1D-Full (0.0181), indicating that capacity reduction acts as implicit
+    regularisation. These results demonstrate that a compact 1D ResNet is
+    sufficient for competitive diagnostic superclass classification on PTB-XL,
+    with model size and storage requirements compatible with edge deployment.</p>
+  </div>
+
+  <hr>
+
+  <!-- Figures -->
+  <div class="section-label">Key Results</div>
+  <div class="figures">
+    <div class="fig-card">
+      <img src="fig_per_class_auroc.png" alt="Per-class AUROC comparison">
+      <div class="fig-cap">Per-class &amp; macro AUROC — test set</div>
+    </div>
+    <div class="fig-card">
+      <img src="fig_training_curves.png" alt="Training curves">
+      <div class="fig-cap">Validation AUROC &amp; training loss over 40 epochs</div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Keywords -->
+  <div class="section-label">Keywords</div>
+  <div class="keywords">
+    <span class="kw">12-lead ECG</span>
+    <span class="kw">ResNet1D</span>
+    <span class="kw">PTB-XL</span>
+    <span class="kw">Efficient deep learning</span>
+    <span class="kw">Multi-label classification</span>
+    <span class="kw">Edge deployment</span>
+    <span class="kw">Resource-constrained settings</span>
+    <span class="kw">Cardiology</span>
+    <span class="kw">Model compression</span>
+  </div>
+
+  <hr>
+
+  <!-- BibTeX -->
+  <div class="section-label">Cite this work</div>
+  <div class="bibtex-wrap">
+    <div class="bibtex-bar">
+      <span>BibTeX</span>
+      <button class="copy-btn" onclick="copyBib(this)">Copy</button>
+    </div>
+    <pre class="bibtex" id="bibtex-block">@misc{ouma2026ecg,
+  title   = {Compact 1D Residual Networks for Efficient
+             12-Lead {ECG} Classification:
+             A {PTB-XL} Benchmarking Study},
+  author  = {Ouma, Craig Carlos},
+  year    = {2026},
+  month   = {June},
+  note    = {Preprint},
+  url     = {https://craigouma.github.io/ptbxl-ecg-paper/}
+}</pre>
+  </div>
+
+  <!-- Links -->
+  <div class="section-label">Links</div>
+  <div class="links-row">
+    <a class="link-card"
+       href="https://scholar.google.com/citations?user=YOUR_SCHOLAR_ID"
+       target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r="20" fill="#4285F4"/>
+        <text x="24" y="31" text-anchor="middle" font-size="22"
+              font-weight="bold" fill="white"
+              font-family="Georgia,serif">S</text>
+      </svg>
+      Google Scholar
+    </a>
+    <a class="link-card" href="https://github.com/craigouma"
+       target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.38.6.11.82-.26.82-.58
+                 0-.28-.01-1.02-.01-2-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75
+                 -1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1
+                 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22
+                 -.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.01
+                 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84
+                 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.6
+                 -.01 2.9-.01 3.29 0 .32.21.7.82.58A12 12 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/>
+      </svg>
+      GitHub
+    </a>
+    <a class="link-card" href="https://craigouma.github.io/neonatal-paper/"
+       target="_blank" rel="noopener">
+      📄 Related: Neonatal Early Warning Paper
+    </a>
+  </div>
+
+  <footer>
+    Craig Carlos Ouma &nbsp;·&nbsp; Independent Researcher &nbsp;·&nbsp; 2026
+    &nbsp;·&nbsp; Dataset: PTB-XL (Wagner et al. 2020, CC BY 4.0)
+  </footer>
+
+</div>
+
+<script>
+  function copyBib(btn) {
+    navigator.clipboard.writeText(
+      document.getElementById('bibtex-block').textContent
+    ).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+</script>
+</body>
+</html>
